@@ -13,11 +13,11 @@ from PIL import Image
 
 from ukc import CATEGORIES, NO_DATA_COLOR, BathyGrid
 
-DATA = os.getenv("DATA_DIR", "/app/data")
+HERE = Path(__file__).parent
+DATA = os.getenv("DATA_DIR", str(HERE / "data"))
 SHIPS_CSV = os.getenv("CSV_PATH", f"{DATA}/ship_to_daftvalues.csv")
 CONTOURS_JSON = f"{DATA}/contours.json"
 GRID_NPY, GRID_META = f"{DATA}/bathy_grid.npy", f"{DATA}/bathy_grid.json"
-HERE = Path(__file__).parent
 
 FULLSCREEN_CSS = """
 <style>

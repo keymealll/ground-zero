@@ -79,7 +79,7 @@ The maths lives in [`ukc.py`](ukc.py) (Python pages) and [`port_view/ukc.js`](po
 | --- | --- | --- |
 | `data/ship_to_daftvalues.csv` | 1,219 anonymised ships: position, AIS navigation status, draft | yes |
 | `data/contours.json` | Depth contours every 5 m, built by `preprocess_bathy.py` | yes |
-| `data/bathy_grid.npy` + `.json` | 0.002° (~200 m) depth grid, built by `preprocess_bathy.py` | **no** (114 MB) |
+| `data/bathy_grid.npy` + `.json` | 0.002° (~200 m) depth grid, float16, built by `preprocess_bathy.py` | yes (57 MB) |
 | `data/bathymetry.csv` | Raw XYZ export of HOMONIM (~1.3 GB) | **no** |
 | `MNT_FACADE_ATLANTIQUE_HOMONIM_NM/` | SHOM HOMONIM 100 m DTM, Atlantic façade, referenced to mean sea level | **no** |
 
@@ -87,11 +87,11 @@ The grid covers roughly 6° W to 5.8° E and 43.3° N to 52.9° N, from Bayonne 
 
 ## Running it
 
-A fresh clone has no depth grid, so build it first.
+The depth grid and contours are in git, so a fresh clone can go straight to step 2.
 
-### 1. Build the depth grid (once)
+### 1. Rebuild the depth grid (optional)
 
-Download the HOMONIM Atlantic DTM into `MNT_FACADE_ATLANTIQUE_HOMONIM_NM/`, then:
+Only needed to change the grid resolution or contours. Download the HOMONIM Atlantic DTM into `MNT_FACADE_ATLANTIQUE_HOMONIM_NM/`, then:
 
 ```bash
 pip install rasterio pyproj numpy pandas   # extract_bathy.py only
@@ -105,7 +105,7 @@ python extract_bathy.py xyz \
 docker compose run --rm --build preprocess
 ```
 
-Without Docker, the last step is `DATA_DIR=./data python preprocess_bathy.py`. Grid cell size, contour step and smoothing are set by environment variables in [`docker-compose.yml`](docker-compose.yml).
+Without Docker, the last step is `python preprocess_bathy.py`. Grid cell size, contour step and smoothing are set by environment variables in [`docker-compose.yml`](docker-compose.yml).
 
 `extract_bathy.py` also has `info` (describe a raster) and `points` (sample depths at your own coordinates) modes; run it with `-h` for details.
 
@@ -121,10 +121,14 @@ Without Docker (Python 3.11):
 
 ```bash
 pip install -r requirements.txt
-DATA_DIR=./data streamlit run app.py
+streamlit run app.py
 ```
 
-Open http://localhost:8501. `DATA_DIR` defaults to `/app/data` (the Docker path), so set it for local runs.
+Open http://localhost:8501. Data is read from the `data/` folder next to the code; set `DATA_DIR` to read it from somewhere else.
+
+### Streamlit Community Cloud
+
+At [share.streamlit.io](https://share.streamlit.io), create an app from this repo with main file `app.py`, and under Advanced settings choose Python 3.11 (`numpy==1.26.4` has no wheels for 3.13 and later).
 
 ## Project layout
 

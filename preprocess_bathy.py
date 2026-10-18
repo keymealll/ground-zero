@@ -17,7 +17,7 @@ import pyarrow as pa
 import pyarrow.csv as pacsv
 import shapely
 
-DATA = os.getenv("DATA_DIR", "/app/data")
+DATA = os.getenv("DATA_DIR", os.path.join(os.path.dirname(os.path.abspath(__file__)), "data"))
 SRC = os.getenv("BATHY_PATH", f"{DATA}/bathymetry.csv")
 SEP = os.getenv("BATHY_SEP", ",")
 GRID_DEG = float(os.getenv("GRID_DEG", "0.002"))      # UKC grid cell size (~200 m)
@@ -87,7 +87,8 @@ del total, count
 print(f"UKC grid {nx} x {ny} cells ({time.time()-t0:.0f}s)")
 
 zmin, zmax = float(np.nanmin(z)), float(np.nanmax(z))
-np.save(f"{DATA}/bathy_grid.npy", z)
+# float16 keeps the file under GitHub's 100 MB limit; error stays under 2 cm in water shallower than 64 m
+np.save(f"{DATA}/bathy_grid.npy", z.astype(np.float16))
 with open(f"{DATA}/bathy_grid.json", "w") as f:
     json.dump({"west": west, "south": south, "cell": GRID_DEG, "nx": nx, "ny": ny,
                "zmin": zmin, "zmax": zmax}, f)
